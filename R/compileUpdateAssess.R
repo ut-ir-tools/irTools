@@ -13,12 +13,20 @@
 
 compileUpdateAssess <- function(prepped_data=prepped_data, master_compiled_file, site_use_param_assessment=site_use_param_assessments){
 
+#Testing
+master_compiled_file = "P:\\WQ\\Integrated Report\\Automation_Development\\elise\\demo2\\303d_assessments_master.csv"
 #Load compiled master workbook
 compiled_master=read.csv(master_compiled_file, stringsAsFactors = FALSE)
 
-#Merge roll up data to compiled master
+#Bring in site assessments
+site_asmt <- site_use_param_assessments
 
-new_master <- 
+#Merge roll up data to compiled master
+new_master <- merge(compiled_master,site_asmt, all=TRUE)
+
+#Subset to rows where new data available
+new <- subset(new_master, !is.na(new_master$AssessCat)& is.na(new_master$PreviousCat))
+updated <- subset(new_master, !is.na(new_master$AssessCat)& !is.na(new_master$PreviousCat))
 
 #Determine latest date assessed using compiled master
 
