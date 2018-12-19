@@ -24,9 +24,14 @@ site_asmt <- site_use_param_assessments
 #Merge roll up data to compiled master
 new_master <- merge(compiled_master,site_asmt, all=TRUE)
 
-#Subset to rows where new data available
+##Subset to rows where Ncount calculations needed (new assessments and updated assessments)
+#New site/param/use
 new <- subset(new_master, !is.na(new_master$AssessCat)& is.na(new_master$PreviousCat))
+new <- new[,!names(new)%in%c("PreviousCat","CycLastAssessed")]
+
+#Updated sites
 updated <- subset(new_master, !is.na(new_master$AssessCat)& !is.na(new_master$PreviousCat))
+updated <- updated[,!names(updated)%in%c("PreviousCat","CycLastAssessed")]
 
 #Determine latest date assessed using compiled master
 
