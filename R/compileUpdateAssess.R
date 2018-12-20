@@ -39,7 +39,11 @@ new <- subset(new_master, !is.na(new_master$AssessCat)& is.na(new_master$Previou
 
 #Aggregate Ncounts of all site-use-param combinations
 date_Data_new_ncount <- aggregate(ActivityStartDate~IR_MLID+BeneficialUse+R3172ParameterName, data=date_Data, FUN=length)
-date_Data_new_ncount[,names(date_Data_new_ncount)%in%c("ActivityStartDate")]<-"Ncount"
+names(date_Data_new_ncount)[names(date_Data_new_ncount)=="ActivityStartDate"]<-"Ncount"
+
+#Merge Ncount with new site/use/param
+new_ncount <- merge(new,date_Data_new_ncount, all.x=TRUE)
+
 #Updated sites
 updated <- subset(new_master, !is.na(new_master$AssessCat)& !is.na(new_master$PreviousCat))
 
