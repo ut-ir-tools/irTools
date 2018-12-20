@@ -11,37 +11,44 @@
 #' @export
 #' 
 
-compileUpdateAssess <- function(prepped_data=prepped_data, master_compiled_file, site_use_param_assessment=site_use_param_assessments){
-
 #Testing
 master_compiled_file = "P:\\WQ\\Integrated Report\\Automation_Development\\elise\\demo2\\303d_assessments_master.csv"
+
+compileUpdateAssess <- function(prepped_data=prepped_data, master_compiled_file, site_use_param_assessment=site_use_param_assessments){
+
 #Load compiled master workbook
 compiled_master=read.csv(master_compiled_file, stringsAsFactors = FALSE)
 
-#Bring in site assessments
-site_asmt <- site_use_param_assessments
-
 #Merge roll up data to compiled master
-new_master <- merge(compiled_master,site_asmt, all=TRUE)
+new_master <- merge(compiled_master,site_use_param_assessments, all=TRUE)
+
+#Read in prepped data, obtain unique site-date-param-use records in preparation for producing Ncounts
+
+date_data <- prepped_data[!names(prepped_data)%in%c("data_flags","flag_reasons")]
+date_data <- date_data[sapply(date_data, nrow)>0]
+
+ext_dat <- function(x) x <- x[,names(x)%in%c("IR_MLID","ActivityStartDate","R3172ParameterName","BeneficialUse")]
+
+date_data <- lapply(date_data,ext_dat)
+date_Data <- do.call("rbind",date_data) #create one data frame from all separate datasets produced by dataPrep
+date_Data <- unique(date_Data)
 
 ##Subset to rows where Ncount calculations needed (new assessments and updated assessments)
 #New site/param/use
 new <- subset(new_master, !is.na(new_master$AssessCat)& is.na(new_master$PreviousCat))
-new <- new[,!names(new)%in%c("PreviousCat","CycLastAssessed")]
 
+#Aggregate Ncounts of all site-use-param combinations
+date_Data_new_ncount <- aggregate(ActivityStartDate~IR_MLID+BeneficialUse+R3172ParameterName, data=date_Data, FUN=length)
+date_Data_new_ncount[,names(date_Data_new_ncount)%in%c("ActivityStartDate")]<-"Ncount"
 #Updated sites
 updated <- subset(new_master, !is.na(new_master$AssessCat)& !is.na(new_master$PreviousCat))
-updated <- updated[,!names(updated)%in%c("PreviousCat","CycLastAssessed")]
 
 #Determine latest date assessed using compiled master
 
 # Latest date = 9-30-(LastCycleAssessed year-2 years)
 
 
-#Count number of samples in prepped_data after latest date assessed, or all samples in current IR cycle if no overlap with last cycle assessed (or new site)
 
-date_data <- prepped_data[!names(prepped_data)%in%c("data_flags","flag_reasons")]
-date_data <- date_data[sapply(date_data, nrow)>0]
 
 #Rbind prepped data back together with activity start date, MLID, parameter, use columns
 
