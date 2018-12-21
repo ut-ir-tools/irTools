@@ -14,6 +14,7 @@
 # master_compiled_file = "P:\\WQ\\Integrated Report\\Automation_Development\\elise\\demo2\\303d_assessments_master.csv"
 # outfile_path = "P:\\WQ\\Integrated Report\\Automation_Development\\elise\\demo2"
 
+#####NOTES TO EH##### add lines about updating master when older data run through code than data used to produce master....
 compileUpdateAssess <- function(prepped_data=prepped_data, master_compiled_file, site_use_param_assessment=site_use_param_assessments, outfile_path){
 
 ## Load compiled master workbook
