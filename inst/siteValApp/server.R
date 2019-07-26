@@ -11,7 +11,7 @@ server <- function(input, output, session){
 library(leaflet)
 library(wqTools)
 
-permits=read.csv(file='data/ut_facilities-04-09-2019.csv')
+permits=read.csv(system.file("extdata", "ut_facilities-04-09-2019.csv", package = "irTools"))
 
 
 # empty reactive objects list
