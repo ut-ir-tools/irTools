@@ -161,6 +161,7 @@ session$onFlushed(once = T, function() {
 		addMapPane("permits", zIndex = 417) %>%
 		addMapPane("highlight", zIndex = 418) %>%
 		addMapPane("labels", zIndex = 419) %>%
+	  removeShape("Assessment units") %>%
 		addCircleMarkers(lat=permits$LatitudeMeasure, lng=permits$LongitudeMeasure, options = pathOptions(pane = "permits"), group="Permits", radius=5,
 			popup = paste0(
 				"Permit ID: ", permits$locationID,
@@ -168,10 +169,16 @@ session$onFlushed(once = T, function() {
 				"<br> Permit type: ", permits$locationType)
 		) %>%
 		addPolygons(data=wqTools::ut_poly,group="State boundary",smoothFactor=4,fillOpacity = 0.1,weight=3,color="purple", options = pathOptions(pane = "underlay_polygons"))  %>%
-		hideGroup('Permits') %>% hideGroup('State boundary') %>%	
+	  addPolygons(data=wqTools::au_poly,group="Assessment units",smoothFactor=4,fillOpacity = 0.1, layerId=au_poly$polyID,weight=3,color="blue", options = pathOptions(pane = "au_poly"),
+	                    popup=paste0(
+	                      "AU name: ", au_poly$AU_NAME,
+	                      "<br> AU ID: ", au_poly$ASSESS_ID,
+	                      "<br> AU type: ", au_poly$AU_Type)
+	    ) %>%
+	  hideGroup('Permits') %>% hideGroup('State boundary') %>% hideGroup('Site ID labels') %>%
 		addLayersControl(
 			position ="topleft",
-			baseGroups = c("Topo","Satellite"),overlayGroups = c("Sites","Site labels", "Permits", "Assessment units","Beneficial uses", "Site-specific standards", "State boundary"),
+			baseGroups = c("Topo","Satellite"),overlayGroups = c("Sites","Site ID labels", "Permits", "Assessment units","Beneficial uses", "Site-specific standards", "State boundary","Watershed management units"),
 			options = layersControlOptions(collapsed = FALSE)
 		)
 	})
@@ -181,7 +188,7 @@ map_proxy=leafletProxy("map")
 
 # Add sites via proxy on site_types change
 observeEvent(reactive_objects$map_sites, ignoreNULL = F, ignoreInit=T, {
-		map_proxy %>% clearGroup(group='Sites') %>% clearGroup(group='Site labels') %>% 
+		map_proxy %>% clearGroup(group='Sites') %>% clearGroup(group='Site ID labels') %>% 
 		addCircleMarkers(data=reactive_objects$map_sites, layerId = ~MonitoringLocationIdentifier, group="Sites", color=~color, options = pathOptions(pane = "markers"))
 		
 		if(dim(reactive_objects$map_sites)[1]>0 & input$auto_zoom){
@@ -189,7 +196,7 @@ observeEvent(reactive_objects$map_sites, ignoreNULL = F, ignoreInit=T, {
 		}
 		
 		if(!is.null(input$site_types) & !is.null(input$review_reasons) & dim(reactive_objects$map_sites)[1]>0){
-			map_proxy %>% addLabelOnlyMarkers(data=reactive_objects$map_sites, group="Site labels", lat=~lat, lng=~long, options = pathOptions(pane = "labels"),
+			map_proxy %>% addLabelOnlyMarkers(data=reactive_objects$map_sites, group="Site ID labels", lat=~lat, lng=~long, options = pathOptions(pane = "labels"),
 				label=~MonitoringLocationIdentifier,labelOptions = labelOptions(noHide = T, textsize = "15px"),
 				clusterOptions=markerClusterOptions(spiderfyOnMaxZoom=T))
 		}
@@ -278,7 +285,7 @@ observeEvent(input$accept, {
 		}),
 		br(),
 		br(),
-		textInput('accept_comment', 'Additional comments (optional)'),
+		textInput('accept_comment', 'Additional comments'),# removed "(optional)"
 		actionButton('accept_ok', 'Accept', style='color: #fff; background-color: #337ab7; border-color: #2e6da4;font-size:120%', icon=icon('check-circle')),
 		actionButton('accept_cancel', 'Cancel', style='color: #fff; background-color: #337ab7; border-color: #2e6da4;font-size:120%', icon=icon('window-close'))
 		))
@@ -336,7 +343,7 @@ observeEvent(input$reject, {
 		}),
 		br(),
 		selectInput("reject_reason", label="Reason for rejecting (applied to all selected sites)", choices=reactive_objects$reject_reasons[order(reactive_objects$reject_reasons)]),
-		textInput('reject_comment', 'Additional comments (optional)'),
+		textInput('reject_comment', 'Additional comments'),# removed "(optional)"
 		actionButton('reject_ok', 'Reject', style='color: #fff; background-color: #337ab7; border-color: #2e6da4;font-size:120%', icon=icon('minus-circle')),
 		actionButton('reject_cancel', 'Cancel', style='color: #fff; background-color: #337ab7; border-color: #2e6da4;font-size:120%', icon=icon('window-close'))
 		))
@@ -396,7 +403,7 @@ observeEvent(input$merge, {
 			selectInput("merge_mlname", label="ML name to merge TO:", choices=reactive_objects$table_selected_table$MonitoringLocationName,
 				selected=reactive_objects$merge_select_mlname)
 		}),
-		textInput('merge_comment', 'Additional comments (optional)'),
+		textInput('merge_comment', 'Additional comments'), # removed "(optional)"
 		actionButton('merge_ok', 'Merge', style='color: #fff; background-color: #337ab7; border-color: #2e6da4;font-size:120%', icon=icon('object-group')),
 		actionButton('merge_cancel', 'Cancel', style='color: #fff; background-color: #337ab7; border-color: #2e6da4;font-size:120%', icon=icon('window-close'))
 		))
@@ -462,7 +469,7 @@ observeEvent(input$flag_further, {
 			)
 		}),
 		br(),
-		textInput('flag_further_comment', 'Additional comments (optional)'),
+		textInput('flag_further_comment', 'Additional comments'),# removed "(optional)"
 		actionButton('flag_ok', 'Flag', style='color: #fff; background-color: #337ab7; border-color: #2e6da4;font-size:120%', icon=icon('flag')),
 		actionButton('flag_cancel', 'Cancel', style='color: #fff; background-color: #337ab7; border-color: #2e6da4;font-size:120%', icon=icon('window-close'))
 		))
